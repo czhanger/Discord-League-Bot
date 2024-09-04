@@ -70,18 +70,23 @@ const {
   getSummonerID,
   getRankData,
 } = require("./Riot/riotFunctions");
+
 const { sendMessageToAll } = require("./defaultChannel");
 const { delay } = require("./misc");
+
+const NAME = "h4xdefender";
+const TAG = "lol";
+
 async function playerID() {
   try {
     // get current game data
-    const player_puuid = await getPuiid("just a shark", "na2");
+    const player_puuid = await getPuiid(NAME, TAG);
     // const player_puuid = process.env.JDAWG;
     const gameData = await getCurrentGame(player_puuid);
     const summonerId = await getSummonerID(player_puuid);
     // if in game
     if (gameData) {
-      sendMessageToAll("Jdawg is in game!", client);
+      sendMessageToAll(`${NAME} is in game`, client);
       const { gameId } = gameData;
       console.log("Current Game Id: ", gameId);
       // wait until game is over
@@ -99,7 +104,7 @@ async function playerID() {
       const rawData = await getRankData(summonerId);
       const rankData = rawData[0];
       sendMessageToAll(
-        `Jdawg is now ${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP.`
+        `${NAME} is now ${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP.`
       );
     }
   } catch (error) {
@@ -114,8 +119,3 @@ playerID();
 
 // Log into Discord with client token
 client.login(process.env.DISCORD_TOKEN);
-
-// how to track a game
-// continue to check if jason is in game
-// once he is in game
-// update game score every 5 minutes

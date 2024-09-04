@@ -99,7 +99,7 @@ module.exports.getRankFromNameTag = async function (name, tag) {
     const summonerId = await module.exports.getSummonerID(puuid);
     return await module.exports.getRankData(summonerId);
   } catch (error) {
-    console.error("Error fecthing rank data", error.message);
+    console.error("Error fetching rank data", error.message);
     return null;
   }
 };
