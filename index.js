@@ -63,12 +63,59 @@ for (const file of eventFiles) {
 
 // Riot Test
 // League API Wrapper
-const { getPuiid } = require("./Riot/riotFunctions");
-
+const {
+  getPuiid,
+  getCurrentGame,
+  getPostGameData,
+  getSummonerID,
+  getRankData,
+} = require("./Riot/riotFunctions");
+const { sendMessageToAll } = require("./defaultChannel");
+const { delay } = require("./misc");
 async function playerID() {
-  const player_puuid = await getPuiid("jdawg", "1337");
-  console.log(player_puuid);
+  try {
+    // get current game data
+    const player_puuid = await getPuiid("just a shark", "na2");
+    const gameData = await getCurrentGame(player_puuid);
+    const summonerId = await getSummonerID(player_puuid);
+    // if in game
+    if (gameData) {
+      sendMessageToAll("Jdawg is in game!", client);
+      const { gameId } = gameData;
+      console.log("Current Game Id: ", gameId);
+      // wait until game is over
+      while (await getCurrentGame(player_puuid)) {
+        console.log("Game in Progress");
+        await delay(60000);
+      }
+      // post game info
+      sendMessageToAll("Game is over", client);
+      let postGameData = await getPostGameData(gameId);
+      while (!postGameData) {
+        postGameData = await getPostGameData(gameId);
+        await delay(60000);
+      }
+      console.log(postGameData);
+      const rawData = await getRankData(summonerId);
+      const rankData = rawData[0];
+      sendMessageToAll(
+        `Jdawg is now ${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP`
+      );
+    }
+  } catch (error) {
+    console.error("Error in fetching game", error);
+  } finally {
+    // recurse and check for new game every 60 seconds
+    setTimeout(playerID, 60000);
+  }
 }
+
+playerID();
 
 // Log into Discord with client token
 client.login(process.env.DISCORD_TOKEN);
+
+// how to track a game
+// continue to check if jason is in game
+// once he is in game
+// update game score every 5 minutes
