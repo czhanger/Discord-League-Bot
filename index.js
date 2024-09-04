@@ -76,6 +76,7 @@ async function playerID() {
   try {
     // get current game data
     const player_puuid = await getPuiid("just a shark", "na2");
+    // const player_puuid = process.env.JDAWG;
     const gameData = await getCurrentGame(player_puuid);
     const summonerId = await getSummonerID(player_puuid);
     // if in game

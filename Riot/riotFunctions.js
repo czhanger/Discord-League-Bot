@@ -86,9 +86,21 @@ module.exports.getRankData = async function (summonerId) {
       }
     );
     const rankData = await accountResponse.json();
-    return rankData;
+    return rankData[0];
   } catch (error) {
     console.error("Error fetching rank data", error.message);
     return null;
   }
 };
+
+module.exports.getRankFromNameTag = async function (name, tag) {
+  try {
+    const puuid = await module.exports.getPuiid(name, tag);
+    const summonerId = await module.exports.getSummonerID(puuid);
+    return await module.exports.getRankData(summonerId);
+  } catch (error) {
+    console.error("Error fecthing rank data", error.message);
+    return null;
+  }
+};
+
