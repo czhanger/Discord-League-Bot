@@ -61,5 +61,7 @@ for (const file of eventFiles) {
   }
 }
 
+// Riot Test
+
 // Log into Discord with client token
 client.login(process.env.DISCORD_TOKEN);
