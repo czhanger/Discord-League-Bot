@@ -5,9 +5,12 @@ module.exports = {
   once: true,
   execute(client) {
     console.log(`Ready! Logged in as ${client.user.tag}`);
-    client.guilds.cache.forEach((guild) => {
-      sendMessageToDefaultChannel(guild, "Yo its Jdawg!");
-    });
+  //   client.guilds.cache.forEach((guild) => {
+  //     sendMessageToDefaultChannel(
+  //       guild,
+  //       "Yo its Jdawg!"
+  //     );
+  //   });
   },
 };
 

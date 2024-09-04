@@ -62,6 +62,13 @@ for (const file of eventFiles) {
 }
 
 // Riot Test
+// League API Wrapper
+const { getPuiid } = require("./Riot/riotFunctions");
+
+async function playerID() {
+  const player_puuid = await getPuiid("jdawg", "1337");
+  console.log(player_puuid);
+}
 
 // Log into Discord with client token
 client.login(process.env.DISCORD_TOKEN);
