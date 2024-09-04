@@ -89,17 +89,16 @@ async function playerID() {
         await delay(60000);
       }
       // post game info
-      sendMessageToAll("Game is over", client);
+      sendMessageToAll("Game is over...", client);
+      await delay(10000);
       let postGameData = await getPostGameData(gameId);
-      while (!postGameData) {
-        postGameData = await getPostGameData(gameId);
-        await delay(60000);
-      }
-      console.log(postGameData);
+      let postGameJson = postGameData.json();
+      console.log(postGameJson);
+      // rank
       const rawData = await getRankData(summonerId);
       const rankData = rawData[0];
       sendMessageToAll(
-        `Jdawg is now ${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP`
+        `Jdawg is now ${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP.`
       );
     }
   } catch (error) {

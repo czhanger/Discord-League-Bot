@@ -46,7 +46,7 @@ module.exports.getCurrentGame = async function (puuid) {
 module.exports.getPostGameData = async function (gameId) {
   try {
     const postGameData = await fetch(
-      `https://americas.api.riotgames.com/lol/match/v5/matches/${gameId}`,
+      `https://americas.api.riotgames.com/lol/match/v5/matches/NA1_${gameId}`,
       {
         headers: { "X-Riot-Token": RIOT_API_KEY },
       }
