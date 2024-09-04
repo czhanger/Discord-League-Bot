@@ -107,7 +107,7 @@ async function playerID() {
       await delay(30000);
       const playerGameData = await getPlayerDataFromGameData(NAME, TAG, gameId);
       const gameResult = await getGameResult(NAME, TAG, gameId);
-      sendMessageToAll(`Game Result: ${gameResult}`);
+      sendMessageToAll(`Game Result: ${gameResult}`, client);
       console.log(playerGameData);
 
       // rank
