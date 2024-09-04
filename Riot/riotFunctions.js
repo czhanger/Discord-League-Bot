@@ -43,20 +43,22 @@ module.exports.getCurrentGame = async function (puuid) {
   }
 };
 
-module.exports.getPostGameData = async function (gameId) {
+// Returns
+module.exports.getGameData = async function (gameId) {
   try {
-    const postGameData = await fetch(
-      `https://americas.api.riotgames.com/lol/match/v5/matches/NA1_${gameId}`,
+    const gameData = await fetch(
+      `https://americas.api.riotgames.com/lol/match/v5/matches/${gameId}`,
       {
         headers: { "X-Riot-Token": RIOT_API_KEY },
       }
     );
-    if (postGameData) {
-      return postGameData;
+    if (gameData) {
+      const gameJson = await gameData.json();
+      return gameJson;
     }
     return null;
   } catch (error) {
-    console.error("Error fetching post game data", error.message);
+    console.error("Error fetching game data", error.message);
     return null;
   }
 };
@@ -104,3 +106,63 @@ module.exports.getRankFromNameTag = async function (name, tag) {
   }
 };
 
+// returns a list of match ids
+module.exports.getMatchHistory = async function (puuid) {
+  try {
+    const matchResponse = await fetch(
+      `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=20`,
+      {
+        headers: { "X-Riot-Token": RIOT_API_KEY },
+      }
+    );
+    const matchHistoryData = await matchResponse.json();
+    return matchHistoryData;
+  } catch (error) {
+    console.error("Error fetching match history data", error.message);
+    return null;
+  }
+};
+
+// generate list of games from current day
+module.exports.getGamesFromToday = async function (name, tag) {
+  const puuid = await module.exports.getPuiid(name, tag);
+  const matchHistory = await module.exports.getMatchHistory(puuid);
+  for (const match of matchHistory) {
+    const matchData = await module.exports.getGameData(match);
+    console.log(matchData.info.gameCreation);
+  }
+};
+
+module.exports.getPlayerDataFromGameData = async function (name, tag, gameId) {
+  const puuid = await module.exports.getPuiid(name, tag);
+  const gameData = await module.exports.getGameData(gameId);
+  try {
+    const playerList = Object.entries(gameData.info)[11][1];
+    for (const player of playerList) {
+      if (player.puuid === puuid) {
+        return player;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching player data from game data", error.message);
+    return null;
+  }
+};
+
+module.exports.getGameResult = async function (name, tag, gameId) {
+  const playerGameData = await module.exports.getPlayerDataFromGameData(
+    name,
+    tag,
+    gameId
+  );
+  try {
+    if (playerGameData.win) {
+      return "W";
+    } else {
+      return "L";
+    }
+  } catch (error) {
+    console.error("Error fetching game result", error.message);
+    return null;
+  }
+};

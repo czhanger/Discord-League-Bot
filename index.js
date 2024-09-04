@@ -66,45 +66,55 @@ for (const file of eventFiles) {
 const {
   getPuiid,
   getCurrentGame,
-  getPostGameData,
   getSummonerID,
   getRankData,
+  getPlayerDataFromGameData,
+  getGameResult,
 } = require("./Riot/riotFunctions");
 
 const { sendMessageToAll } = require("./defaultChannel");
 const { delay } = require("./misc");
 
-const NAME = "h4xdefender";
-const TAG = "lol";
+const NAME = "jdawg";
+const TAG = "1337";
 
 async function playerID() {
   try {
     // get current game data
     const player_puuid = await getPuiid(NAME, TAG);
+
     // const player_puuid = process.env.JDAWG;
     const gameData = await getCurrentGame(player_puuid);
     const summonerId = await getSummonerID(player_puuid);
+
     // if in game
     if (gameData) {
       sendMessageToAll(`${NAME} is in game`, client);
-      const { gameId } = gameData;
+
+      // get current gameId from gameData
+      let { gameId } = gameData;
+      gameId = "NA1_" + gameId;
       console.log("Current Game Id: ", gameId);
+
       // wait until game is over
       while (await getCurrentGame(player_puuid)) {
         console.log("Game in Progress");
         await delay(60000);
       }
+
       // post game info
       sendMessageToAll("Game is over...", client);
-      await delay(10000);
-      let postGameData = await getPostGameData(gameId);
-      let postGameJson = postGameData.json();
-      console.log(postGameJson);
+      await delay(30000);
+      const playerGameData = await getPlayerDataFromGameData(NAME, TAG, gameId);
+      const gameResult = await getGameResult(NAME, TAG, gameId);
+      sendMessageToAll(`Game Result: ${gameResult}`);
+      console.log(playerGameData);
+
       // rank
-      const rawData = await getRankData(summonerId);
-      const rankData = rawData[0];
+      const rankData = await getRankData(summonerId);
       sendMessageToAll(
-        `${NAME} is now ${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP.`
+        `${NAME} is now ${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP.`,
+        client
       );
     }
   } catch (error) {
