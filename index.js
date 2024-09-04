@@ -45,40 +45,21 @@ for (const folder of commandFolders) {
   }
 }
 
-// receive an interaction for every slash command executed, respond by creating a listener
-client.on(Events.InteractionCreate, async (interaction) => {
-  // ensures this function only handles slash commands
-  if (!interaction.isChatInputCommand()) return;
+// dynamically retrieve event files from events folder
+const eventsPath = path.join(__dirname, "events");
+const eventFiles = fs
+  .readdirSync(eventsPath)
+  .filter((file) => file.endsWith(".js"));
 
-  const command = interaction.client.commands.get(interaction.commandName);
-
-  if (!command) {
-    console.error(`No command matching ${interaction.commandName} was found.`);
-    return;
+for (const file of eventFiles) {
+  const filePath = path.join(eventsPath, file);
+  const event = require(filePath);
+  if (event.once) {
+    client.once(event.name, (...args) => event.execute(...args));
+  } else {
+    client.on(event.name, (...args) => event.execute(...args));
   }
-
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: `There was an error while executing this command!`,
-        ephemeral: true,
-      });
-    } else {
-      await interaction.reply({
-        content: "There was an error while executing this command!",
-        ephemeral: true,
-      });
-    }
-  }
-});
-
-// runs once when client is ready
-client.once(Events.ClientReady, (readyClient) => {
-  console.log(`Ready! Logged in as ${readyClient.user.tag}`);
-});
+}
 
 // Log into Discord with client token
 client.login(process.env.DISCORD_TOKEN);
