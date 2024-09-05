@@ -3,7 +3,12 @@ const REGION = "americas";
 const SUMMONER_NAME = "jdawg"; // Replace with the League of Legends username
 const TAG = "1337";
 
-const { unixToDate, getTodaysDate } = require("./utilities");
+const {
+  unixToDate,
+  getTodaysDate,
+  secondsToHours,
+  adjustDateIfBefore6AM,
+} = require("./utilities");
 
 module.exports.getPuiid = async function (summonerName, tag) {
   try {
@@ -140,13 +145,15 @@ module.exports.getMatchHistory = async function (puuid) {
 module.exports.getGamesFromToday = async function (name, tag) {
   const puuid = await module.exports.getPuiid(name, tag);
   const matchHistory = await module.exports.getMatchHistory(puuid);
-  const currentDate = await getTodaysDate();
+  const currentDate = getTodaysDate();
 
   var gameList = [];
   // for match if from current day, add to list
   for (const match of matchHistory) {
     const matchData = await module.exports.getGameData(match);
-    if ((await unixToDate(matchData.info.gameCreation)) === currentDate) {
+    const nonAdjustedTime = await unixToDate(matchData.info.gameCreation);
+    const adjustedTime = adjustDateIfBefore6AM(nonAdjustedTime);
+    if (adjustedTime === currentDate) {
       gameList.push(matchData);
     }
   }
@@ -157,6 +164,7 @@ module.exports.getGamesFromToday = async function (name, tag) {
 module.exports.getPlayerDataFromGameData = async function (name, tag, gameId) {
   const puuid = await module.exports.getPuiid(name, tag);
   const gameData = await module.exports.getGameData(gameId);
+
   try {
     const playerList = Object.entries(gameData.info)[11][1];
     for (const player of playerList) {
@@ -177,6 +185,7 @@ module.exports.getGameResult = async function (name, tag, gameId) {
     tag,
     gameId
   );
+
   try {
     if (playerGameData.win) {
       return "W";
@@ -187,4 +196,15 @@ module.exports.getGameResult = async function (name, tag, gameId) {
     console.error("Error fetching game result", error.message);
     return null;
   }
+};
+
+// add up total time spent in games
+// returns a string formatted time
+module.exports.getTotalGameTime = async function (gameList) {
+  var totalTime = 0;
+
+  for (const match of gameList) {
+    totalTime += match.info.gameDuration;
+  }
+  return secondsToHours(totalTime);
 };

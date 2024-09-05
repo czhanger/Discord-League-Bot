@@ -7,7 +7,7 @@ module.exports.unixToDate = async function (unixTime) {
     year: "numeric",
     month: "long",
     day: "numeric",
-    // hour: "numeric",
+    hour: "numeric",
     // minute: "numeric",
     // second: "numeric",
     hour12: true, // 12-hour format
@@ -17,19 +17,67 @@ module.exports.unixToDate = async function (unixTime) {
   return new Intl.DateTimeFormat("en-US", options).format(date);
 };
 
+// get todays date
+// 24 hour period starting from 6am
 module.exports.getTodaysDate = function () {
   const date = new Date(); // Create a new Date object with the current date and time
 
-  // Format options for "Month Day, Year"
-  const options = { year: "numeric", month: "long", day: "numeric" };
+  // Check if the time is before 6 AM
+  if (date.getHours() < 6) {
+    date.setDate(date.getDate() - 1); // Subtract one day if before 6 AM
+  }
 
-  // Format date to "Month Day, Year" using the 'en-US' locale
-  return date.toLocaleDateString("en-US", options);
+  // Format options for "Month Day, Year, Hour:Minute:Second"
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour12: true, // 12-hour format
+  };
+
+  // Format date to "Month Day, Year, Hour:Minute:Second AM/PM" using the 'en-US' locale
+  return date.toLocaleString("en-US", options);
 };
 
-module.exports.totalPlayTime = function (matchList) {
-  var totalTime = 0;
-  for (const match in matchList) {
-    //add up total time
+module.exports.secondsToHours = function (seconds) {
+  const hours = Math.floor(seconds / 3600); // Calculate the whole hours
+  const minutes = Math.floor((seconds % 3600) / 60); // Calculate remaining minutes
+  const remainingSeconds = seconds % 60; // Calculate remaining seconds
+
+  return `${hours} hours, ${minutes} minutes, and ${remainingSeconds} seconds`;
+};
+
+module.exports.adjustDateIfBefore6AM = function (dateString) {
+  // Extract date and time parts from the input string
+  const [datePart, timePart] = dateString.split(" at ");
+  const [month, day, year] = datePart.split(" ");
+
+  // Extract time and period (AM/PM)
+  const [time, period] = timePart.split(" ");
+  const [hours, minutes = 0] = time.split(":").map(Number);
+
+  // Convert 12-hour format to 24-hour format
+  let adjustedHours = hours % 12; // Convert 12 AM or PM to 0 or 12, respectively
+  if (period.toUpperCase() === "PM") {
+    adjustedHours += 12; // Add 12 hours for PM times
   }
+
+  // Create a new Date object
+  const parsedDate = new Date(`${month} ${day}, ${year}`);
+  parsedDate.setHours(adjustedHours, minutes, 0, 0); // Set the hours and minutes
+
+  // Check if the parsed time is before 6 AM
+  if (parsedDate.getHours() < 6) {
+    parsedDate.setDate(parsedDate.getDate() - 1); // Subtract one day if before 6 AM
+  }
+
+  // Format options for "Month Day, Year"
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+
+  // Format date to "Month Day, Year" using the 'en-US' locale
+  return parsedDate.toLocaleDateString("en-US", options);
 };

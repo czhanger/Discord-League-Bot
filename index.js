@@ -70,13 +70,18 @@ const {
   formatRankString,
   getPlayerDataFromGameData,
   getGameResult,
+  getGamesFromToday,
+  getTotalGameTime,
 } = require("./Riot/riotFunctions");
 
 const { sendMessageToAll } = require("./defaultChannel");
 const { delay } = require("./misc");
+const { send } = require("node:process");
 
 const NAME = "jdawg";
 const TAG = "1337";
+
+// ------------------------ Main In Game Player Tracking Function -----------------------
 
 async function playerID() {
   try {
@@ -104,17 +109,29 @@ async function playerID() {
         await delay(60000);
       }
 
-      // post game info
+      // ----------------------- post game info -------------------------
+      await delay(20000);
+      sendMessageToAll(
+        "-----------------------------------------------------------",
+        client
+      );
       sendMessageToAll("Game is over...", client);
-      await delay(30000);
       const playerGameData = await getPlayerDataFromGameData(NAME, TAG, gameId);
       const gameResult = await getGameResult(NAME, TAG, gameId);
       sendMessageToAll(`Game Result: ${gameResult}`, client);
-      console.log(playerGameData);
-
+      const gameList = await getGamesFromToday(NAME, TAG);
+      const gameTimeStr = await getTotalGameTime(gameList);
+      sendMessageToAll(
+        `${NAME} has played ${gameList.length} games today. Total Game Time: ${gameTimeStr}.`,
+        client
+      );
       // rank
       const newRank = await formatRankString(NAME, TAG);
       sendMessageToAll(`Rank Change: ${currentRank} -> ${newRank}.`, client);
+      sendMessageToAll(
+        "------------------------------------------------------------",
+        client
+      );
     }
   } catch (error) {
     console.error("Error in fetching game", error);

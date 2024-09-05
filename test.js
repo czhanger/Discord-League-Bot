@@ -12,6 +12,7 @@ const {
   getPlayerDataFromGameData,
   getGameResult,
   formatRankString,
+  getTotalGameTime,
 } = require("./Riot/riotFunctions");
 
 const { getTodaysDate } = require("./Riot/utilities");
@@ -21,6 +22,8 @@ async function main() {
   const summonerId = await getSummonerID(puuid);
   const todaysGames = await getGamesFromToday(NAME, TAG);
   console.log(todaysGames.length);
+  const gameTime = await getTotalGameTime(todaysGames);
+  console.log(await getTotalGameTime(todaysGames));
   //   console.log(rankData);
   //   const gameData = await getGameData("NA1_5104118758");
   //   console.log(Object.entries(gameData.info)[11][1][0].summonerId);
