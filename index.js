@@ -77,9 +77,10 @@ const {
 const { sendMessageToAll } = require("./defaultChannel");
 const { delay } = require("./misc");
 const { send } = require("node:process");
+const { unixToDate } = require("./Riot/utilities");
 
-const NAME = "jdawg";
-const TAG = "1337";
+const NAME = "Just A Shark";
+const TAG = "na2";
 
 // ------------------------ Main In Game Player Tracking Function -----------------------
 
@@ -96,25 +97,22 @@ async function playerID() {
     const currentRank = await formatRankString(NAME, TAG);
     // if in game
     if (gameData) {
-      sendMessageToAll(`${NAME} is in game`, client);
+      sendMessageToAll(`${NAME} just entered the Rift.`, client);
 
       // get current gameId from gameData
       let { gameId } = gameData;
       gameId = "NA1_" + gameId;
       console.log("Current Game Id: ", gameId);
-
+      console.log(`Game Start: ${await unixToDate(gameData.gameStartTime)}`);
       // wait until game is over
       while (await getCurrentGame(player_puuid)) {
         console.log("Game in Progress");
         await delay(60000);
       }
 
-      // ----------------------- post game info -------------------------
+      // ----------------------- post game info -----------------------------
       await delay(20000);
-      sendMessageToAll(
-        "-----------------------------------------------------------",
-        client
-      );
+      sendMessageToAll("-".repeat(20), client);
       sendMessageToAll("Game is over...", client);
       const playerGameData = await getPlayerDataFromGameData(NAME, TAG, gameId);
       const gameResult = await getGameResult(NAME, TAG, gameId);
@@ -128,11 +126,9 @@ async function playerID() {
       // rank
       const newRank = await formatRankString(NAME, TAG);
       sendMessageToAll(`Rank Change: ${currentRank} -> ${newRank}.`, client);
-      sendMessageToAll(
-        "------------------------------------------------------------",
-        client
-      );
+      sendMessageToAll("-".repeat(20), client);
     }
+    // ---------------------------------------------------------------------
   } catch (error) {
     console.error("Error in fetching game", error);
   } finally {
