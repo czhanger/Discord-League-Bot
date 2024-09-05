@@ -3,6 +3,8 @@ const REGION = "americas";
 const SUMMONER_NAME = "jdawg"; // Replace with the League of Legends username
 const TAG = "1337";
 
+const { unixToDate, getTodaysDate } = require("./utilities");
+
 module.exports.getPuiid = async function (summonerName, tag) {
   try {
     const summonerResponse = await fetch(
@@ -106,6 +108,17 @@ module.exports.getRankFromNameTag = async function (name, tag) {
   }
 };
 
+// returns formatted rank string
+module.exports.formatRankString = async function (name, tag) {
+  try {
+    const rankData = await module.exports.getRankFromNameTag(name, tag);
+    const rankString = `${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP`;
+    return rankString;
+  } catch (error) {
+    console.error("Error fetching rank data", error.message);
+    return null;
+  }
+};
 // returns a list of match ids
 module.exports.getMatchHistory = async function (puuid) {
   try {
@@ -127,12 +140,20 @@ module.exports.getMatchHistory = async function (puuid) {
 module.exports.getGamesFromToday = async function (name, tag) {
   const puuid = await module.exports.getPuiid(name, tag);
   const matchHistory = await module.exports.getMatchHistory(puuid);
+  const currentDate = await getTodaysDate();
+
+  var gameList = [];
+  // for match if from current day, add to list
   for (const match of matchHistory) {
     const matchData = await module.exports.getGameData(match);
-    console.log(matchData.info.gameCreation);
+    if ((await unixToDate(matchData.info.gameCreation)) === currentDate) {
+      gameList.push(matchData);
+    }
   }
+  return gameList;
 };
 
+// get individual player data from game data
 module.exports.getPlayerDataFromGameData = async function (name, tag, gameId) {
   const puuid = await module.exports.getPuiid(name, tag);
   const gameData = await module.exports.getGameData(gameId);
@@ -149,6 +170,7 @@ module.exports.getPlayerDataFromGameData = async function (name, tag, gameId) {
   }
 };
 
+// returns W or L
 module.exports.getGameResult = async function (name, tag, gameId) {
   const playerGameData = await module.exports.getPlayerDataFromGameData(
     name,

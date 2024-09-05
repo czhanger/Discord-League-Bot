@@ -67,7 +67,7 @@ const {
   getPuiid,
   getCurrentGame,
   getSummonerID,
-  getRankData,
+  formatRankString,
   getPlayerDataFromGameData,
   getGameResult,
 } = require("./Riot/riotFunctions");
@@ -87,6 +87,8 @@ async function playerID() {
     const gameData = await getCurrentGame(player_puuid);
     const summonerId = await getSummonerID(player_puuid);
 
+    // current rank
+    const currentRank = await formatRankString(NAME, TAG);
     // if in game
     if (gameData) {
       sendMessageToAll(`${NAME} is in game`, client);
@@ -111,11 +113,8 @@ async function playerID() {
       console.log(playerGameData);
 
       // rank
-      const rankData = await getRankData(summonerId);
-      sendMessageToAll(
-        `${NAME} is now ${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP.`,
-        client
-      );
+      const newRank = await formatRankString(NAME, TAG);
+      sendMessageToAll(`Rank Change: ${currentRank} -> ${newRank}.`, client);
     }
   } catch (error) {
     console.error("Error in fetching game", error);
