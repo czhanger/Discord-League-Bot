@@ -32,6 +32,6 @@ async function main() {
   //   );
   //   console.log(await getGameResult(NAME, TAG, "NA1_5104135919"));
   //   console.log(await formatRankString(NAME, TAG));
+  console.log(`${"-".repeat(20)}`);
 }
-
 main();

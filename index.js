@@ -79,8 +79,8 @@ const { delay } = require("./misc");
 const { send } = require("node:process");
 const { unixToDate } = require("./Riot/utilities");
 
-const NAME = "Just A Shark";
-const TAG = "na2";
+const NAME = "Jdawg";
+const TAG = "1337";
 
 // ------------------------ Main In Game Player Tracking Function -----------------------
 
@@ -95,6 +95,7 @@ async function gameTrackingBot() {
 
     // current rank
     const currentRank = await formatRankString(NAME, TAG);
+
     // if in game
     if (gameData) {
       sendMessageToAll(`${NAME} just entered the Rift!`, client);
@@ -106,10 +107,10 @@ async function gameTrackingBot() {
       console.log("-".repeat(20));
       console.log("New Game Started\nCurrent Game Id: ", gameId);
       console.log(`Game Start: ${await unixToDate(gameData.gameStartTime)}`);
+      console.log("Game in Progress");
 
       // wait until game is over
       while (await getCurrentGame(player_puuid)) {
-        console.log("Game in Progress");
         await delay(60000);
       }
 
@@ -117,35 +118,35 @@ async function gameTrackingBot() {
       console.log("-".repeat(20));
 
       // ----------------------- post game info -----------------------------
-      await delay(20000);
-
-      sendMessageToAll("-".repeat(20), client);
-      sendMessageToAll("Game is over...", client);
+      await delay(6000);
 
       // Show game result
       const playerGameData = await getPlayerDataFromGameData(NAME, TAG, gameId);
       const gameResult = await getGameResult(NAME, TAG, gameId);
-      sendMessageToAll(`Game Result: ${gameResult}`, client);
 
       // Show number of games played today and total time spent
       const gameList = await getGamesFromToday(NAME, TAG);
       const gameTimeStr = await getTotalGameTime(gameList);
-      sendMessageToAll(
-        `${NAME} has played ${gameList.length} games today. Total Game Time: ${gameTimeStr}.`,
-        client
-      );
-
       // Show change in rank
       const newRank = await formatRankString(NAME, TAG);
-      sendMessageToAll(`Rank Change: ${currentRank} -> ${newRank}.`, client);
-      sendMessageToAll("-".repeat(20), client);
+
+      sendMessageToAll(
+        `${"-".repeat(
+          40
+        )}\nGame is over...\nGame Result: ${gameResult}\n${NAME} has played ${
+          gameList.length
+        } games today. Total Game Time: ${gameTimeStr}.\nRank Change: ${currentRank} -> ${newRank}.\n${"-".repeat(
+          40
+        )}`,
+        client
+      );
     }
     // ---------------------------------------------------------------------
   } catch (error) {
     console.error("Error in fetching game", error);
   } finally {
-    // recurse and check for new game every 60 seconds
-    setTimeout(playerID, 60000);
+    // recurse and check for new game every 120 seconds
+    setTimeout(gameTrackingBot, 120000);
   }
 }
 
