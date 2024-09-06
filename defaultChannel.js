@@ -27,8 +27,6 @@ module.exports.sendMessageToAll = function (message, client) {
 };
 
 module.exports.sendMessageToChannel = function (message, client, channelId) {
-  client.on("ready", () => {
-    const channel = client.channels.cache.get(channelId);
-    channel.send(message);
-  });
+  const channel = client.channels.cache.get(channelId);
+  channel.send(message);
 };

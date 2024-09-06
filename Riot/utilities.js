@@ -92,11 +92,11 @@ module.exports.calcLPChange = function (newRank, oldRank, gameResult) {
     console.log("rank increase");
     // If loss and new rank is higher than old (decreased division)
   } else if (gameResult === "L" && newRank > oldRank) {
-    console.log("decrease");
+    console.log("rank decrease");
     LPChange = -(oldRank + (100 - newRank));
   } else {
     LPChange = newRank - oldRank;
-    console.log("same");
+    console.log("same rank");
   }
   return LPChange;
 };
@@ -104,5 +104,7 @@ module.exports.calcLPChange = function (newRank, oldRank, gameResult) {
 module.exports.createLPStr = function (LP) {
   if (LP > 0) {
     return "+" + LP;
+  } else {
+    return LP;
   }
 };

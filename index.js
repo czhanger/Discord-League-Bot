@@ -83,7 +83,7 @@ const { unixToDate } = require("./Riot/utilities");
 
 const NAME = "Jdawg";
 const TAG = "1337";
-
+const CHANNEL = process.env.CHANNEL_ID;
 // ------------------------ Main In Game Player Tracking Function -----------------------
 
 async function gameTrackingBot() {
@@ -100,8 +100,7 @@ async function gameTrackingBot() {
     const currentLP = (await getRankFromNameTag(NAME, TAG)).leaguePoints;
 
     if (gameData) {
-      sendMessageToAll(`${NAME} just entered the Rift!`, client);
-
+      sendMessageToChannel(`${NAME} just entered the Rift!`, client, CHANNEL);
       // get current gameId from gameData
       let { gameId } = gameData;
       gameId = "NA1_" + gameId;
@@ -132,7 +131,7 @@ async function gameTrackingBot() {
       const newRank = await formatRankString(NAME, TAG);
       const newLP = (await getRankFromNameTag(NAME, TAG)).leaguePoints;
       const LPStr = createLPStr(calcLPChange(newLP, currentLP, gameResult));
-      sendMessageToAll(
+      sendMessageToChannel(
         `${"-".repeat(
           40
         )}\nGame is over...\nGame Result: ${gameResult}\n${NAME} has played ${
@@ -140,7 +139,8 @@ async function gameTrackingBot() {
         } games today. Total Game Time: ${gameTimeStr}.\nRank Change: ${currentRank} -> ${newRank} (${LPStr})\n${"-".repeat(
           40
         )}`,
-        client
+        client,
+        CHANNEL
       );
     }
     // ---------------------------------------------------------------------
@@ -155,6 +155,7 @@ async function gameTrackingBot() {
 // Log into Discord with client token
 client.login(process.env.DISCORD_TOKEN);
 
-gameTrackingBot();
-
-sendMessageToChannel("meow", client, "1280825077998424064");
+// Start bot functions once client is ready
+client.on("ready", () => {
+  gameTrackingBot();
+});
