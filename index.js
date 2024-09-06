@@ -76,7 +76,7 @@ const {
 } = require("./Riot/riotFunctions");
 
 const { calcLPChange, createLPStr } = require("./Riot/utilities");
-const { sendMessageToAll } = require("./defaultChannel");
+const { sendMessageToAll, sendMessageToChannel } = require("./defaultChannel");
 const { delay } = require("./misc");
 const { send } = require("node:process");
 const { unixToDate } = require("./Riot/utilities");
@@ -152,7 +152,9 @@ async function gameTrackingBot() {
   }
 }
 
-gameTrackingBot();
-
 // Log into Discord with client token
 client.login(process.env.DISCORD_TOKEN);
+
+gameTrackingBot();
+
+sendMessageToChannel("meow", client, "1280825077998424064");

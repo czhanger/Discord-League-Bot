@@ -25,3 +25,10 @@ module.exports.sendMessageToAll = function (message, client) {
     sendMessageToDefaultChannel(guild, message);
   });
 };
+
+module.exports.sendMessageToChannel = function (message, client, channelId) {
+  client.on("ready", () => {
+    const channel = client.channels.cache.get(channelId);
+    channel.send(message);
+  });
+};
