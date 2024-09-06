@@ -102,6 +102,7 @@ module.exports.getRankData = async function (summonerId) {
   }
 };
 
+// helper function that finds summonerID from name + tag and then returns Rank Data
 module.exports.getRankFromNameTag = async function (name, tag) {
   try {
     const puuid = await module.exports.getPuiid(name, tag);

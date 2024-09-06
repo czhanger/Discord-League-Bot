@@ -81,3 +81,28 @@ module.exports.adjustDateIfBefore6AM = function (dateString) {
   // Format date to "Month Day, Year" using the 'en-US' locale
   return parsedDate.toLocaleDateString("en-US", options);
 };
+
+module.exports.calcLPChange = function (newRank, oldRank, gameResult) {
+  let LPChange = 0;
+  newRank = Number(newRank);
+  oldRank = Number(oldRank);
+  // If win and new rank is lower than old (increased division)
+  if (gameResult === "W" && newRank < oldRank) {
+    LPChange = 100 - oldRank + newRank;
+    console.log("rank increase");
+    // If loss and new rank is higher than old (decreased division)
+  } else if (gameResult === "L" && newRank > oldRank) {
+    console.log("decrease");
+    LPChange = -(oldRank + (100 - newRank));
+  } else {
+    LPChange = newRank - oldRank;
+    console.log("same");
+  }
+  return LPChange;
+};
+
+module.exports.createLPStr = function (LP) {
+  if (LP > 0) {
+    return "+" + LP;
+  }
+};
