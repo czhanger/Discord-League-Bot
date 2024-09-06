@@ -39,7 +39,7 @@ module.exports.getCurrentGame = async function (puuid) {
 
     if (!gameResponse.ok) {
       // Handle specific HTTP errors gracefully
-      console.log("Game:", gameData.status.status_code);
+      // console.log("No Game, Code:", gameData.status.status_code); // error code for testing
       return null; // Return null to indicate no active game or an error
     }
 

@@ -61,101 +61,20 @@ for (const file of eventFiles) {
   }
 }
 
-// Riot Test
-// League API Wrapper
-const {
-  getPuiid,
-  getCurrentGame,
-  getSummonerID,
-  formatRankString,
-  getPlayerDataFromGameData,
-  getGameResult,
-  getGamesFromToday,
-  getTotalGameTime,
-  getRankFromNameTag,
-} = require("./Riot/riotFunctions");
+const { gameTrackingBot, stopGameTrackingBot } = require("./live-updates");
 
-const { calcLPChange, createLPStr } = require("./Riot/utilities");
-const { sendMessageToAll, sendMessageToChannel } = require("./defaultChannel");
-const { delay } = require("./misc");
-const { send } = require("node:process");
-const { unixToDate } = require("./Riot/utilities");
-
-const NAME = "Jdawg";
-const TAG = "1337";
+const NAME = "homeslicer";
+const TAG = "na1";
 const CHANNEL = process.env.CHANNEL_ID;
-// ------------------------ Main In Game Player Tracking Function -----------------------
-
-async function gameTrackingBot() {
-  try {
-    // get current game data
-    const player_puuid = await getPuiid(NAME, TAG);
-
-    // const player_puuid = process.env.JDAWG;
-    const gameData = await getCurrentGame(player_puuid);
-    const summonerId = await getSummonerID(player_puuid);
-
-    // save current rank for comparison
-    const currentRank = await formatRankString(NAME, TAG);
-    const currentLP = (await getRankFromNameTag(NAME, TAG)).leaguePoints;
-
-    if (gameData) {
-      sendMessageToChannel(`${NAME} just entered the Rift!`, client, CHANNEL);
-      // get current gameId from gameData
-      let { gameId } = gameData;
-      gameId = "NA1_" + gameId;
-
-      console.log("-".repeat(20));
-      console.log("New Game Started\nCurrent Game Id: ", gameId);
-      console.log(`Game Start: ${await unixToDate(gameData.gameStartTime)}`);
-      console.log("Game in Progress");
-
-      // wait until game is over
-      while (await getCurrentGame(player_puuid)) {
-        await delay(60000);
-      }
-
-      console.log("Game is over.");
-      console.log("-".repeat(20));
-
-      // ----------------------- post game info -----------------------------
-      await delay(6000);
-
-      // Show game result
-      const playerGameData = await getPlayerDataFromGameData(NAME, TAG, gameId);
-      const gameResult = await getGameResult(NAME, TAG, gameId);
-      // Show number of games played today and total time spent
-      const gameList = await getGamesFromToday(NAME, TAG);
-      const gameTimeStr = await getTotalGameTime(gameList);
-      // Show change in rank
-      const newRank = await formatRankString(NAME, TAG);
-      const newLP = (await getRankFromNameTag(NAME, TAG)).leaguePoints;
-      const LPStr = createLPStr(calcLPChange(newLP, currentLP, gameResult));
-      sendMessageToChannel(
-        `${"-".repeat(
-          40
-        )}\nGame is over...\nGame Result: ${gameResult}\n${NAME} has played ${
-          gameList.length
-        } games today. Total Game Time: ${gameTimeStr}.\nRank Change: ${currentRank} -> ${newRank} (${LPStr})\n${"-".repeat(
-          40
-        )}`,
-        client,
-        CHANNEL
-      );
-    }
-    // ---------------------------------------------------------------------
-  } catch (error) {
-    console.error("Error in fetching game", error);
-  } finally {
-    // recurse and check for new game every 120 seconds
-    setTimeout(gameTrackingBot, 120000);
-  }
-}
 
 // Log into Discord with client token
 client.login(process.env.DISCORD_TOKEN);
 
 // Start bot functions once client is ready
 client.on("ready", () => {
-  gameTrackingBot();
+  // waiting for track-player slash event to emit signal
+  client.on("startTracking", (name, tag, channel) => {
+    console.log(`Started tracking: ${name} #${tag}`);
+    gameTrackingBot(name, tag, client, channel);
+  });
 });
