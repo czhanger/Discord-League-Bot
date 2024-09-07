@@ -61,7 +61,7 @@ for (const file of eventFiles) {
   }
 }
 
-const { gameTrackingBot, stopGameTrackingBot } = require("./live-updates");
+const { gameTrackingBot, stopGameTrackingBot } = require("./game-tracking");
 
 const NAME = "homeslicer";
 const TAG = "na1";
