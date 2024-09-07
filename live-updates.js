@@ -21,6 +21,7 @@ const { unixToDate } = require("./Riot/utilities");
 
 // Object to manage control flags for each instance
 const botInstances = {};
+const playerList = {};
 
 module.exports.gameTrackingBot = async function (
   name,
@@ -40,14 +41,15 @@ module.exports.gameTrackingBot = async function (
       const gameData = await getCurrentGame(player_puuid);
       const summonerId = await getSummonerID(player_puuid);
 
-      // Save current rank for comparison
-      const currentRank = await formatRankString(name, tag);
-      const currentLP = (await getRankFromNameTag(name, tag)).leaguePoints;
-
       if (gameData) {
         sendMessageToChannel(`${name} just entered the Rift!`, client, channel);
         let { gameId } = gameData;
         gameId = "NA1_" + gameId;
+
+        // Save current rank for comparison
+        const currentRank = await formatRankString(name, tag);
+        const currentLP = (await getRankFromNameTag(name, tag)).leaguePoints;
+        console.log(`Current Rank: ${currentRank} ${currentLP}`);
 
         console.log("-".repeat(20));
         console.log(
@@ -79,10 +81,15 @@ module.exports.gameTrackingBot = async function (
         const gameResult = await getGameResult(name, tag, gameId);
         const gameList = await getGamesFromToday(name, tag);
         const gameTimeStr = await getTotalGameTime(gameList);
+
         const newRank = await formatRankString(name, tag);
         const newLP = (await getRankFromNameTag(name, tag)).leaguePoints;
+
         const LPStr = createLPStr(calcLPChange(newLP, currentLP, gameResult));
 
+        console.log(`Current Rank check again: ${currentRank} ${currentLP}`);
+        console.log(`New Rank check: ${newRank} ${newLP}`);
+        
         sendMessageToChannel(
           `${"-".repeat(
             40

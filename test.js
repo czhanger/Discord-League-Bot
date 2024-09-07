@@ -37,15 +37,15 @@ async function main() {
   console.log(LPChange);
 }
 main();
-// const prompt = require("prompt-sync")();
 
-// function testLP() {
-//   var newLP = prompt("new:");
-//   var currLP = prompt("old:");
-//   var gameRes = prompt("result:");
-//   console.log(calcLPChange(newLP, currLP, gameRes));
-// }
+const prompt = require("prompt-sync")();
+function testLP() {
+  var newLP = prompt("new:");
+  var currLP = prompt("old:");
+  var gameRes = prompt("result:");
+  console.log(calcLPChange(newLP, currLP, gameRes));
+}
 
-// while (true) {
-//   testLP();
-// }
+while (true) {
+  testLP();
+}

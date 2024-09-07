@@ -1,7 +1,5 @@
 const RIOT_API_KEY = process.env.RIOT_API_KEY;
 const REGION = "americas";
-const SUMMONER_NAME = "jdawg"; // Replace with the League of Legends username
-const TAG = "1337";
 
 const {
   unixToDate,
@@ -95,7 +93,7 @@ module.exports.getRankData = async function (summonerId) {
       }
     );
     const rankData = await accountResponse.json();
-    return rankData[0];
+    return rankData.find((game) => game.queueType === "RANKED_SOLO_5x5");
   } catch (error) {
     console.error("Error fetching rank data", error.message);
     return null;
@@ -109,7 +107,7 @@ module.exports.getRankFromNameTag = async function (name, tag) {
     const summonerId = await module.exports.getSummonerID(puuid);
     return await module.exports.getRankData(summonerId);
   } catch (error) {
-    console.error("Error fetching rank data", error.message);
+    console.error("Error fetching rank data from name tag", error.message);
     return null;
   }
 };
@@ -121,7 +119,7 @@ module.exports.formatRankString = async function (name, tag) {
     const rankString = `${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP`;
     return rankString;
   } catch (error) {
-    console.error("Error fetching rank data", error.message);
+    console.error("Error formatting rank data", error.message);
     return null;
   }
 };
