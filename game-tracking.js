@@ -94,7 +94,7 @@ module.exports.gameTrackingBot = async function (
           gameId
         );
 
-        const playerScoreString = `Final Score: (${playerChampion}) ${playerGameData.kills} Kills - ${playerGameData.deaths} Deaths - ${playerGameData.assists} Assists`;
+        const playerScoreString = `Final Score: (${playerChampion}) ${playerGameData.kills} Kills | ${playerGameData.deaths} Deaths | ${playerGameData.assists} Assists`;
 
         const gameResult = await getGameResult(name, tag, gameId);
         const gameList = await getGamesFromToday(name, tag);
@@ -109,7 +109,7 @@ module.exports.gameTrackingBot = async function (
         if (currentRank === null || newRank === null) {
           rankChangeString = "No rank data available. Player is in placements.";
         } else {
-          rankChangeString = `Rank Change: ${currentRank} -> ${newRank} (${LPStr})\n`;
+          rankChangeString = `Rank Change: ${currentRank} -> ${newRank} (${LPStr})`;
         }
 
         sendMessageToChannel(
