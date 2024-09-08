@@ -70,8 +70,15 @@ module.exports.getGameData = async function (gameId) {
 
 module.exports.getChampionName = async function (championId) {
   try {
+    // fetch latest riot patch
+    const versionsResponse = await fetch(
+      `https://ddragon.leagueoflegends.com/api/versions.json`
+    );
+    const latestVersion = (await versionsResponse.json())[0];
+
+    // fetch list of champions
     const championResponse = await fetch(
-      `https://ddragon.leagueoflegends.com/cdn/12.6.1/data/en_US/champion.json`
+      `https://ddragon.leagueoflegends.com/cdn/${latestVersion}/data/en_US/champion.json`
     );
     const championJson = await championResponse.json();
     const championData = Object.values(championJson.data).find(

@@ -117,7 +117,9 @@ module.exports.gameTrackingBot = async function (
             40
           )}\n${name}'s game is over...\nGame Result: ${gameResult}\n${playerScoreString}\n${rankChangeString}\n${name} has played ${
             gameList.length
-          } games today.\nTotal Game Time: ${gameTimeStr}.\n${"-".repeat(40)}`,
+          } game(s) today.\nTotal Game Time: ${gameTimeStr}.\n${"-".repeat(
+            40
+          )}`,
           client,
           channel
         );
