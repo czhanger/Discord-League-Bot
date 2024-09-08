@@ -65,7 +65,13 @@ module.exports.gameTrackingBot = async function (
 
         // Save current rank for comparison
         const currentRank = await formatRankString(name, tag);
-        const currentLP = (await getRankFromNameTag(name, tag)).leaguePoints;
+        let currentLP = null;
+        
+        try {
+          currentLP = (await getRankFromNameTag(name, tag)).leaguePoints;
+        } catch (error) {
+          console.error("No Rank Data", error);
+        }
 
         console.log("-".repeat(20));
         console.log(
