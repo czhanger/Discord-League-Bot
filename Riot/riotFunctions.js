@@ -93,6 +93,7 @@ module.exports.getRankData = async function (summonerId) {
       }
     );
     const rankData = await accountResponse.json();
+    // returned object holds an object for every game the player has a rank in (lol, tft)
     return rankData.find((game) => game.queueType === "RANKED_SOLO_5x5");
   } catch (error) {
     console.error("Error fetching rank data", error.message);
@@ -116,7 +117,13 @@ module.exports.getRankFromNameTag = async function (name, tag) {
 module.exports.formatRankString = async function (name, tag) {
   try {
     const rankData = await module.exports.getRankFromNameTag(name, tag);
-    const rankString = `${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP`;
+    let rankString;
+    // if user has not rank information (never played rank/ in placements)
+    if (rankData === undefined) {
+      rankString = null;
+    } else {
+      rankString = `${rankData.tier} ${rankData.rank}: ${rankData.leaguePoints} LP`;
+    }
     return rankString;
   } catch (error) {
     console.error("Error formatting rank data", error.message);

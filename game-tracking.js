@@ -49,11 +49,10 @@ module.exports.gameTrackingBot = async function (
         // Save current rank for comparison
         const currentRank = await formatRankString(name, tag);
         const currentLP = (await getRankFromNameTag(name, tag)).leaguePoints;
-        console.log(`Current Rank: ${currentRank} ${currentLP}`);
 
         console.log("-".repeat(20));
         console.log(
-          `New Game Started\nPlayer: ${name}\nCurrent Game Id: `,
+          `New Game Started\nPlayer: ${name}\nCurrent Rank: ${currentRank}\nCurrent Game Id: `,
           gameId
         );
         console.log(`Game Start: ${await unixToDate(gameData.gameStartTime)}`);
@@ -89,13 +88,21 @@ module.exports.gameTrackingBot = async function (
 
         console.log(`Current Rank check again: ${currentRank} ${currentLP}`);
         console.log(`New Rank check: ${newRank} ${newLP}`);
-        
+
+        // if rank data is available, show rank change
+        let rankChangeString;
+        if (currentRank === null || newRank === null) {
+          rankChangeString = "No rank data available. Player is in placements.";
+        } else {
+          rankChangeString = `Rank Change: ${currentRank} -> ${newRank} (${LPStr})\n`;
+        }
+
         sendMessageToChannel(
           `${"-".repeat(
             40
           )}\nGame is over...\nGame Result: ${gameResult}\n${name} has played ${
             gameList.length
-          } games today. Total Game Time: ${gameTimeStr}.\nRank Change: ${currentRank} -> ${newRank} (${LPStr})\n${"-".repeat(
+          } games today. Total Game Time: ${gameTimeStr}.\n${rankChangeString}${"-".repeat(
             40
           )}`,
           client,
@@ -104,8 +111,8 @@ module.exports.gameTrackingBot = async function (
       }
 
       // Delay before next check
-      await delay(60000); // Check for new game every 120 seconds
       console.log(`${name} not in game`);
+      await delay(60000); // Check for new game every 120 seconds
     }
   } catch (error) {
     console.error(`Error in fetching game for instance ${instanceId}`, error);

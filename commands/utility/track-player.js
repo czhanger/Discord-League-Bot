@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
-const { gameTrackingBot, stopGameTrackingBot } = require("../../live-updates");
+const { gameTrackingBot, stopGameTrackingBot } = require("../../game-tracking");
 
 module.exports = {
   data: new SlashCommandBuilder()

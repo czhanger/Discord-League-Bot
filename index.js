@@ -74,7 +74,7 @@ client.login(process.env.DISCORD_TOKEN);
 client.on("ready", () => {
   // waiting for track-player slash event to emit signal
   client.on("startTracking", (name, tag, channel) => {
-    console.log(`Started tracking: ${name} #${tag}`);
+    console.log(`Started Tracking: ${name} #${tag}`);
     gameTrackingBot(name, tag, client, channel);
   });
 });
