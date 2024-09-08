@@ -66,7 +66,7 @@ module.exports.gameTrackingBot = async function (
         // Save current rank for comparison
         const currentRank = await formatRankString(name, tag);
         let currentLP = null;
-        
+
         try {
           currentLP = (await getRankFromNameTag(name, tag)).leaguePoints;
         } catch (error) {
@@ -107,7 +107,14 @@ module.exports.gameTrackingBot = async function (
         const gameTimeStr = await getTotalGameTime(gameList);
 
         const newRank = await formatRankString(name, tag);
-        const newLP = (await getRankFromNameTag(name, tag)).leaguePoints;
+
+        let newLP = null;
+        try {
+          newLP = (await getRankFromNameTag(name, tag)).leaguePoints;
+        } catch (error) {
+          console.error("Error fetching new LP", error);
+        }
+
         const LPStr = createLPStr(calcLPChange(newLP, currentLP, gameResult));
 
         // if rank data is available, show rank change
@@ -117,7 +124,7 @@ module.exports.gameTrackingBot = async function (
         } else {
           rankChangeString = `Rank Change: ${currentRank} -> ${newRank} (${LPStr})`;
         }
-
+        
         sendMessageToChannel(
           `${"-".repeat(
             40
