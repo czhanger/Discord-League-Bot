@@ -68,6 +68,22 @@ module.exports.getGameData = async function (gameId) {
   }
 };
 
+module.exports.getChampionName = async function (championId) {
+  try {
+    const championResponse = await fetch(
+      `https://ddragon.leagueoflegends.com/cdn/12.6.1/data/en_US/champion.json`
+    );
+    const championJson = await championResponse.json();
+    const championData = Object.values(championJson.data).find(
+      (champ) => champ.key === championId
+    );
+    return championData.name;
+  } catch (error) {
+    console.error("Error fetching champion data", error);
+    return null;
+  }
+};
+
 module.exports.getSummonerID = async function (puuid) {
   try {
     const accountResponse = await fetch(
@@ -130,6 +146,7 @@ module.exports.formatRankString = async function (name, tag) {
     return null;
   }
 };
+
 // returns a list of match ids
 module.exports.getMatchHistory = async function (puuid) {
   try {
@@ -166,6 +183,26 @@ module.exports.getGamesFromToday = async function (name, tag) {
   return gameList;
 };
 
+// current game json is different from match history game data
+module.exports.getPlayerDataFromCurrentGame = async function (
+  name,
+  tag,
+  currentGame
+) {
+  const puuid = await module.exports.getPuiid(name, tag);
+  try {
+    const playerList = Object.entries(currentGame.participants);
+    for (const player of playerList) {
+      if (player[1].puuid === puuid) {
+        return player[1];
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching player data from game data", error.message);
+    return null;
+  }
+};
+
 // get individual player data from game data
 module.exports.getPlayerDataFromGameData = async function (name, tag, gameId) {
   const puuid = await module.exports.getPuiid(name, tag);
@@ -191,7 +228,6 @@ module.exports.getGameResult = async function (name, tag, gameId) {
     tag,
     gameId
   );
-
   try {
     if (playerGameData.win) {
       return "W";

@@ -10,6 +10,8 @@ const {
   getGamesFromToday,
   getTotalGameTime,
   getRankFromNameTag,
+  getChampionName,
+  getPlayerDataFromCurrentGame,
 } = require("./Riot/riotFunctions");
 
 const { calcLPChange, createLPStr } = require("./Riot/utilities");
@@ -42,9 +44,24 @@ module.exports.gameTrackingBot = async function (
       const summonerId = await getSummonerID(player_puuid);
 
       if (gameData) {
-        sendMessageToChannel(`${name} just entered the Rift!`, client, channel);
         let { gameId } = gameData;
         gameId = "NA1_" + gameId;
+
+        let currentGamePlayerData = await getPlayerDataFromCurrentGame(
+          name,
+          tag,
+          gameData
+        );
+
+        const playerChampion = await getChampionName(
+          "" + currentGamePlayerData.championId // add "" converts num to string
+        );
+
+        sendMessageToChannel(
+          `${name} (${playerChampion}) just entered the Rift!`,
+          client,
+          channel
+        );
 
         // Save current rank for comparison
         const currentRank = await formatRankString(name, tag);
@@ -77,17 +94,15 @@ module.exports.gameTrackingBot = async function (
           gameId
         );
 
+        const playerScoreString = `Final Score: (${playerChampion}) ${playerGameData.kills} Kills - ${playerGameData.deaths} Deaths - ${playerGameData.assists} Assists`;
+
         const gameResult = await getGameResult(name, tag, gameId);
         const gameList = await getGamesFromToday(name, tag);
         const gameTimeStr = await getTotalGameTime(gameList);
 
         const newRank = await formatRankString(name, tag);
         const newLP = (await getRankFromNameTag(name, tag)).leaguePoints;
-
         const LPStr = createLPStr(calcLPChange(newLP, currentLP, gameResult));
-
-        console.log(`Current Rank check again: ${currentRank} ${currentLP}`);
-        console.log(`New Rank check: ${newRank} ${newLP}`);
 
         // if rank data is available, show rank change
         let rankChangeString;
@@ -100,11 +115,9 @@ module.exports.gameTrackingBot = async function (
         sendMessageToChannel(
           `${"-".repeat(
             40
-          )}\nGame is over...\nGame Result: ${gameResult}\n${name} has played ${
+          )}\n${name}'s game is over...\nGame Result: ${gameResult}\n${playerScoreString}\n${rankChangeString}\n${name} has played ${
             gameList.length
-          } games today. Total Game Time: ${gameTimeStr}.\n${rankChangeString}${"-".repeat(
-            40
-          )}`,
+          } games today.\nTotal Game Time: ${gameTimeStr}.\n${"-".repeat(40)}`,
           client,
           channel
         );

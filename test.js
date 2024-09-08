@@ -13,6 +13,7 @@ const {
   getGameResult,
   formatRankString,
   getTotalGameTime,
+  getChampionName,
 } = require("./Riot/riotFunctions");
 
 const { getTodaysDate, calcLPChange } = require("./Riot/utilities");
@@ -33,19 +34,19 @@ async function main() {
   //   console.log(await getGameResult(NAME, TAG, "NA1_5104135919"));
   //   console.log(await formatRankString(NAME, TAG));
   // New Rank Old Rank
-  const LPChange = calcLPChange(50, 47, "W");
-  console.log(LPChange);
+  //   const LPChange = calcLPChange(50, 47, "W");
+  //   console.log(LPChange);
 }
 main();
 
-const prompt = require("prompt-sync")();
-function testLP() {
-  var newLP = prompt("new:");
-  var currLP = prompt("old:");
-  var gameRes = prompt("result:");
-  console.log(calcLPChange(newLP, currLP, gameRes));
-}
+// const prompt = require("prompt-sync")();
+// function testLP() {
+//   var newLP = prompt("new:");
+//   var currLP = prompt("old:");
+//   var gameRes = prompt("result:");
+//   console.log(calcLPChange(newLP, currLP, gameRes));
+// }
 
-while (true) {
-  testLP();
-}
+// while (true) {
+//   testLP();
+// }
