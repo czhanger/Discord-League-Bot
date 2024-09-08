@@ -22,7 +22,9 @@ const { unixToDate } = require("./Riot/utilities");
 // ------------------------ Main In Game Player Tracking Function -----------------------
 
 // Object to manage control flags for each instance
+// Object of trackers
 const botInstances = {};
+
 const playerList = {};
 
 module.exports.gameTrackingBot = async function (
@@ -34,7 +36,7 @@ module.exports.gameTrackingBot = async function (
 ) {
   // Initialize control flag for this instance
   botInstances[instanceId] = true;
-
+  console.log(`Player List: ${Object.keys(botInstances)}`);
   try {
     while (botInstances[instanceId]) {
       // Continue only if this instance is running
@@ -100,7 +102,7 @@ module.exports.gameTrackingBot = async function (
           gameId
         );
 
-        const playerScoreString = `Final Score: (${playerChampion}) ${playerGameData.kills} Kills | ${playerGameData.deaths} Deaths | ${playerGameData.assists} Assists`;
+        const playerScoreString = `Final Score: (${playerChampion}) ${playerGameData.kills} Kills  |  ${playerGameData.deaths} Deaths  |  ${playerGameData.assists} Assists`;
 
         const gameResult = await getGameResult(name, tag, gameId);
         const gameList = await getGamesFromToday(name, tag);
@@ -124,7 +126,7 @@ module.exports.gameTrackingBot = async function (
         } else {
           rankChangeString = `Rank Change: ${currentRank} -> ${newRank} (${LPStr})`;
         }
-        
+
         sendMessageToChannel(
           `${"-".repeat(
             40
@@ -156,5 +158,14 @@ module.exports.stopGameTrackingBot = async function (instanceId) {
     console.log(
       `Instance ${instanceId} is not running or has already been stopped.`
     );
+  }
+};
+
+// if instance already exists
+module.exports.checkBotInstances = function (instanceId) {
+  if (botInstances[instanceId] === true) {
+    return true;
+  } else {
+    return false;
   }
 };

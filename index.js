@@ -70,11 +70,12 @@ const CHANNEL = process.env.CHANNEL_ID;
 // Log into Discord with client token
 client.login(process.env.DISCORD_TOKEN);
 
+
 // Start bot functions once client is ready
 client.on("ready", () => {
   // waiting for track-player slash event to emit signal
   client.on("startTracking", (name, tag, channel) => {
     console.log(`Started Tracking: ${name} #${tag}`);
-    gameTrackingBot(name, tag, client, channel);
+    gameTrackingBot(name, tag, client, channel, name);
   });
 });
