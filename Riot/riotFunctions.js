@@ -34,7 +34,6 @@ module.exports.getCurrentGame = async function (puuid) {
       }
     );
     const gameData = await gameResponse.json();
-
     if (!gameResponse.ok) {
       // Handle specific HTTP errors gracefully
       // console.log("No Game, Code:", gameData.status.status_code); // error code for testing
@@ -116,6 +115,7 @@ module.exports.getRankData = async function (summonerId) {
       }
     );
     const rankData = await accountResponse.json();
+    console.log(rankData);
     // returned object holds an object for every game the player has a rank in (lol, tft)
     return rankData.find((game) => game.queueType === "RANKED_SOLO_5x5");
   } catch (error) {
@@ -256,4 +256,20 @@ module.exports.getTotalGameTime = async function (gameList) {
     totalTime += match.info.gameDuration;
   }
   return secondsToHours(totalTime);
+};
+
+// search queue JSON for matching queue type id
+module.exports.getQueueFromID = async function (queueTypeConfigID) {
+  try {
+    const queueTypeResponse = await fetch(
+      `https://static.developer.riotgames.com/docs/lol/queues.json`
+    );
+    const queueTypeJson = await queueTypeResponse.json();
+    const queueTypeObject = queueTypeJson.find(
+      (queueType) => queueType.queueId === queueTypeConfigID
+    );
+    return queueTypeObject;
+  } catch (error) {
+    console.error("Unable to fetch Queue Type ID JSON", error);
+  }
 };

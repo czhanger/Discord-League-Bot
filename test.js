@@ -14,6 +14,7 @@ const {
   formatRankString,
   getTotalGameTime,
   getChampionName,
+  getQueueFromID,
 } = require("./Riot/riotFunctions");
 
 const { getTodaysDate, calcLPChange } = require("./Riot/utilities");
@@ -36,6 +37,7 @@ async function main() {
   // New Rank Old Rank
   //   const LPChange = calcLPChange(50, 47, "W");
   //   console.log(LPChange);
+  console.log(await getQueueFromID(990));
 }
 main();
 

@@ -12,6 +12,7 @@ const {
   getRankFromNameTag,
   getChampionName,
   getPlayerDataFromCurrentGame,
+  getQueueFromID,
 } = require("./Riot/riotFunctions");
 
 const { calcLPChange, createLPStr } = require("./Riot/utilities");
@@ -24,8 +25,6 @@ const { unixToDate } = require("./Riot/utilities");
 // Object to manage control flags for each instance
 // Object of trackers
 const botInstances = {};
-
-const playerList = {};
 
 module.exports.gameTrackingBot = async function (
   name,
@@ -49,6 +48,9 @@ module.exports.gameTrackingBot = async function (
         let { gameId } = gameData;
         gameId = "NA1_" + gameId;
 
+        const gameType = getQueueFromID(gameData.gameQueueConfigId);
+        console.log("queue id: ", gameType);
+        
         let currentGamePlayerData = await getPlayerDataFromCurrentGame(
           name,
           tag,
@@ -102,7 +104,12 @@ module.exports.gameTrackingBot = async function (
           gameId
         );
 
-        const playerScoreString = `Final Score: (${playerChampion}) ${playerGameData.kills} Kills  |  ${playerGameData.deaths} Deaths  |  ${playerGameData.assists} Assists`;
+        // temp catch for when method randomly fails to fetch puuid
+        try {
+          const playerScoreString = `Final Score: (${playerChampion}) ${playerGameData.kills} Kills  |  ${playerGameData.deaths} Deaths  |  ${playerGameData.assists} Assists`;
+        } catch (error) {
+          console.error("Failed to fetch Player Score", error);
+        }
 
         const gameResult = await getGameResult(name, tag, gameId);
         const gameList = await getGamesFromToday(name, tag);
@@ -153,6 +160,7 @@ module.exports.gameTrackingBot = async function (
 module.exports.stopGameTrackingBot = async function (instanceId) {
   if (botInstances[instanceId]) {
     botInstances[instanceId] = false; // Set the control flag to false for this instance
+    delete botInstances[instanceId]; // Clear instance after stopping
     console.log(`Game tracking bot instance ${instanceId} has been stopped.`);
   } else {
     console.log(
@@ -161,11 +169,7 @@ module.exports.stopGameTrackingBot = async function (instanceId) {
   }
 };
 
-// if instance already exists
+// checks if instance already exists
 module.exports.checkBotInstances = function (instanceId) {
-  if (botInstances[instanceId] === true) {
-    return true;
-  } else {
-    return false;
-  }
+  return botInstances[instanceId] === true;
 };
