@@ -12,10 +12,14 @@ const {
   getRankFromNameTag,
   getChampionName,
   getPlayerDataFromCurrentGame,
-  getQueueFromID,
+  getQueueIdFromConfigId,
 } = require("./Riot/riotFunctions");
 
-const { calcLPChange, createLPStr } = require("./Riot/utilities");
+const {
+  calcLPChange,
+  createLPStr,
+  createQueueTypeStr,
+} = require("./Riot/utilities");
 const { sendMessageToAll, sendMessageToChannel } = require("./defaultChannel");
 const { delay } = require("./misc");
 const { unixToDate } = require("./Riot/utilities");
@@ -43,14 +47,24 @@ module.exports.gameTrackingBot = async function (
       const player_puuid = await getPuiid(name, tag);
       const gameData = await getCurrentGame(player_puuid);
       const summonerId = await getSummonerID(player_puuid);
+      // check if queue type is a ranked mode
+      let isRanked = false;
 
       if (gameData) {
         let { gameId } = gameData;
         gameId = "NA1_" + gameId;
 
-        const gameType = getQueueFromID(gameData.gameQueueConfigId);
-        console.log("queue id: ", gameType);
-        
+        // get queue config from current game data and return the correct game mode description
+        const gameMode = createQueueTypeStr(
+          await getQueueIdFromConfigId(gameData.gameQueueConfigId)
+        );
+
+        if (gameMode.includes("RANKED")) {
+          isRanked = true;
+          console.log("ranked");
+        }
+
+        // get player's data from current game
         let currentGamePlayerData = await getPlayerDataFromCurrentGame(
           name,
           tag,
@@ -62,42 +76,49 @@ module.exports.gameTrackingBot = async function (
         );
 
         sendMessageToChannel(
-          `${name} (${playerChampion}) just entered the Rift!`,
+          `${name} (${playerChampion}) just entered the Rift!\nQueue Type: ${gameMode}`,
           client,
           channel
         );
 
         // Save current rank for comparison
-        const currentRank = await formatRankString(name, tag);
+        let currentRank;
         let currentLP = null;
-
-        try {
-          currentLP = (await getRankFromNameTag(name, tag)).leaguePoints;
-        } catch (error) {
-          console.error("No Rank Data", error);
+        if (isRanked) {
+          currentRank = await formatRankString(name, tag, gameMode);
+          try {
+            currentLP = (await getRankFromNameTag(name, tag, gameMode))
+              .leaguePoints;
+          } catch (error) {
+            console.error("No Rank Data", error);
+          }
         }
 
-        console.log("-".repeat(20));
+        // Log New Game Info
+        console.log("-".repeat(40));
         console.log(
-          `New Game Started\nPlayer: ${name}\nCurrent Rank: ${currentRank}\nCurrent Game Id: `,
-          gameId
+          `New Game Started
+Player: ${name}
+Game Mode: ${gameMode}
+${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
         );
         console.log(`Game Start: ${await unixToDate(gameData.gameStartTime)}`);
-        console.log("-".repeat(20));
+        console.log("-".repeat(40));
 
         // Wait until game is over
         while (await getCurrentGame(player_puuid)) {
-          if (!botInstances[instanceId]) return; // Check if this instance should stop
+          if (!botInstances[instanceId]) return; // Check if this instance has been stopped
           await delay(60000); // Wait 1 minute
         }
 
-        console.log("-".repeat(20));
+        // Log end of game
+        console.log("-".repeat(40));
         console.log(`${name}'s game ended`);
-        console.log("-".repeat(20));
+        console.log("-".repeat(40));
 
         await delay(6000); // Small delay before fetching post-game data
 
-        // Show game result
+        // Show player's game result
         const playerGameData = await getPlayerDataFromGameData(
           name,
           tag,
@@ -105,43 +126,53 @@ module.exports.gameTrackingBot = async function (
         );
 
         // temp catch for when method randomly fails to fetch puuid
+        let playerScoreString;
         try {
-          const playerScoreString = `Final Score: (${playerChampion}) ${playerGameData.kills} Kills  |  ${playerGameData.deaths} Deaths  |  ${playerGameData.assists} Assists`;
+          playerScoreString = `Final Score: (${playerChampion}) ${playerGameData.kills} Kills  |  ${playerGameData.deaths} Deaths  |  ${playerGameData.assists} Assists`;
         } catch (error) {
           console.error("Failed to fetch Player Score", error);
         }
 
-        const gameResult = await getGameResult(name, tag, gameId);
-        const gameList = await getGamesFromToday(name, tag);
-        const gameTimeStr = await getTotalGameTime(gameList);
+        const gameResult = await getGameResult(name, tag, gameId); // win or loss
+        const gameList = await getGamesFromToday(name, tag); // list of games from today
+        const gameTimeStr = await getTotalGameTime(gameList); // total game time in hours, mins, seconds
 
-        const newRank = await formatRankString(name, tag);
-
+        let newRank;
         let newLP = null;
-        try {
-          newLP = (await getRankFromNameTag(name, tag)).leaguePoints;
-        } catch (error) {
-          console.error("Error fetching new LP", error);
-        }
-
-        const LPStr = createLPStr(calcLPChange(newLP, currentLP, gameResult));
-
-        // if rank data is available, show rank change
         let rankChangeString;
-        if (currentRank === null || newRank === null) {
-          rankChangeString = "No rank data available. Player is in placements.";
-        } else {
-          rankChangeString = `Rank Change: ${currentRank} -> ${newRank} (${LPStr})`;
+        let LPStr;
+
+        // create LP change string and Rank change string
+        if (isRanked) {
+          try {
+            newRank = await formatRankString(name, tag, gameMode);
+            newLP = (await getRankFromNameTag(name, tag, gameMode))
+              .leaguePoints;
+          } catch (error) {
+            console.error("Error fetching new LP", error);
+          }
+
+          LPStr = createLPStr(calcLPChange(newLP, currentLP, gameResult)); // shows LP change (+/-)
+
+          // if rank data is available, show rank change
+          if (currentRank === null || newRank === null) {
+            rankChangeString =
+              "No rank data available. Player is in placements.";
+          } else {
+            rankChangeString = `Rank Change: ${currentRank} -> ${newRank} (${LPStr})\n`;
+          }
         }
 
         sendMessageToChannel(
-          `${"-".repeat(
-            40
-          )}\n${name}'s game is over...\nGame Result: ${gameResult}\n${playerScoreString}\n${rankChangeString}\n${name} has played ${
+          `${"-".repeat(40)}
+${name}'s game is over...
+Game Result: ${gameResult}
+${playerScoreString}
+${isRanked ? rankChangeString : ""}${name} has played ${
             gameList.length
-          } game(s) today.\nTotal Game Time: ${gameTimeStr}.\n${"-".repeat(
-            40
-          )}`,
+          } game(s) today.
+Total Game Time: ${gameTimeStr}.
+${"-".repeat(40)}`,
           client,
           channel
         );

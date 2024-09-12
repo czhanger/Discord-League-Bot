@@ -109,6 +109,17 @@ module.exports.createLPStr = function (LP) {
 module.exports.createQueueTypeStr = function (queueType) {
   try {
     const queueDescription = queueType.description;
+
+    // return ranked string that matches queue type from match api
+    // or return description of normal game mode
+    switch (queueDescription) {
+      case "5v5 Ranked Solo games":
+        return "RANKED_SOLO_5x5";
+      case "5v5 Ranked Flex games":
+        return "RANKED_FLEX_SR";
+      default:
+        return queueDescription;
+    }
   } catch (error) {
     console.error("Failed to format Queue Type", error);
   }

@@ -106,7 +106,7 @@ module.exports.getSummonerID = async function (puuid) {
   }
 };
 
-module.exports.getRankData = async function (summonerId) {
+module.exports.getRankData = async function (summonerId,queue) {
   try {
     const accountResponse = await fetch(
       `https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}`,
@@ -117,7 +117,7 @@ module.exports.getRankData = async function (summonerId) {
     const rankData = await accountResponse.json();
     console.log(rankData);
     // returned object holds an object for every game the player has a rank in (lol, tft)
-    return rankData.find((game) => game.queueType === "RANKED_SOLO_5x5");
+    return rankData.find((game) => game.queueType === queue);
   } catch (error) {
     console.error("Error fetching rank data", error.message);
     return null;
@@ -125,11 +125,11 @@ module.exports.getRankData = async function (summonerId) {
 };
 
 // helper function that finds summonerID from name + tag and then returns Rank Data
-module.exports.getRankFromNameTag = async function (name, tag) {
+module.exports.getRankFromNameTag = async function (name, tag, queue) {
   try {
     const puuid = await module.exports.getPuiid(name, tag);
     const summonerId = await module.exports.getSummonerID(puuid);
-    return await module.exports.getRankData(summonerId);
+    return await module.exports.getRankData(summonerId, queue);
   } catch (error) {
     console.error("Error fetching rank data from name tag", error.message);
     return null;
@@ -137,11 +137,11 @@ module.exports.getRankFromNameTag = async function (name, tag) {
 };
 
 // returns formatted rank string
-module.exports.formatRankString = async function (name, tag) {
+module.exports.formatRankString = async function (name, tag, queue) {
   try {
-    const rankData = await module.exports.getRankFromNameTag(name, tag);
+    const rankData = await module.exports.getRankFromNameTag(name, tag, queue);
     let rankString;
-    // if user has not rank information (never played rank/ in placements)
+    // if user has no rank information (never played rank/ in placements)
     if (rankData === undefined) {
       rankString = null;
     } else {
@@ -259,7 +259,7 @@ module.exports.getTotalGameTime = async function (gameList) {
 };
 
 // search queue JSON for matching queue type id
-module.exports.getQueueFromID = async function (queueTypeConfigID) {
+module.exports.getQueueIdFromConfigId = async function (queueTypeConfigID) {
   try {
     const queueTypeResponse = await fetch(
       `https://static.developer.riotgames.com/docs/lol/queues.json`

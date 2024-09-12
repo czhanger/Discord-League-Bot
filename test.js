@@ -1,7 +1,7 @@
 const dotenv = require("dotenv");
 dotenv.config();
-NAME = "jdawg";
-TAG = "1337";
+NAME = "lolyoultg";
+TAG = "000";
 const {
   getRankFromNameTag,
   getPuiid,
@@ -14,10 +14,14 @@ const {
   formatRankString,
   getTotalGameTime,
   getChampionName,
-  getQueueFromID,
+  getQueueIdFromConfigId,
 } = require("./Riot/riotFunctions");
 
-const { getTodaysDate, calcLPChange } = require("./Riot/utilities");
+const {
+  getTodaysDate,
+  calcLPChange,
+  createQueueTypeStr,
+} = require("./Riot/utilities");
 async function main() {
   const rankData = await getRankFromNameTag(NAME, TAG);
   const puuid = await getPuiid(NAME, TAG);
@@ -37,7 +41,8 @@ async function main() {
   // New Rank Old Rank
   //   const LPChange = calcLPChange(50, 47, "W");
   //   console.log(LPChange);
-  console.log(await getQueueFromID(990));
+  const queueId = await getQueueIdFromConfigId(990);
+  console.log(createQueueTypeStr(queueId));
 }
 main();
 
