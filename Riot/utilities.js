@@ -87,10 +87,10 @@ module.exports.calcLPChange = function (newRank, oldRank, gameResult) {
   newRank = Number(newRank);
   oldRank = Number(oldRank);
   // If win and new rank is lower than old (increased division)
-  if (gameResult === "W" && newRank < oldRank) {
+  if (gameResult === "Win" && newRank < oldRank) {
     LPChange = 100 - oldRank + newRank;
     // If loss and new rank is higher than old (decreased division)
-  } else if (gameResult === "L" && newRank > oldRank) {
+  } else if (gameResult === "Loss" && newRank > oldRank) {
     LPChange = -(oldRank + (100 - newRank));
   } else {
     LPChange = newRank - oldRank;

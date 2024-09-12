@@ -237,9 +237,9 @@ module.exports.getGameResult = async function (name, tag, gameId) {
   );
   try {
     if (playerGameData.win) {
-      return "W";
+      return "Win";
     } else {
-      return "L";
+      return "Loss";
     }
   } catch (error) {
     console.error("Error fetching game result", error.message);
@@ -258,8 +258,8 @@ module.exports.getTotalGameTime = async function (gameList) {
   return secondsToHours(totalTime);
 };
 
-// search queue JSON for matching queue type id
-module.exports.getQueueIdFromConfigId = async function (queueTypeConfigID) {
+// search queue object for matching queue type id
+module.exports.getQueueFromConfigId = async function (queueTypeConfigID) {
   try {
     const queueTypeResponse = await fetch(
       `https://static.developer.riotgames.com/docs/lol/queues.json`

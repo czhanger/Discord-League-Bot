@@ -12,7 +12,7 @@ const {
   getRankFromNameTag,
   getChampionName,
   getPlayerDataFromCurrentGame,
-  getQueueIdFromConfigId,
+  getQueueFromConfigId,
 } = require("./Riot/riotFunctions");
 
 const {
@@ -55,13 +55,22 @@ module.exports.gameTrackingBot = async function (
         gameId = "NA1_" + gameId;
 
         // get queue config from current game data and return the correct game mode description
-        const gameMode = createQueueTypeStr(
-          await getQueueIdFromConfigId(gameData.gameQueueConfigId)
+        const queueObject = await getQueueFromConfigId(
+          gameData.gameQueueConfigId
         );
+
+        // get queue description string to be sent as part of game start notification
+        let queueDescription;
+        try {
+          queueDescription = queueObject.description;
+        } catch (error) {
+          console.error("Error accessing queue description", error);
+        }
+
+        const gameMode = createQueueTypeStr(queueObject); // current game mode, used to check if player is in ranked
 
         if (gameMode.includes("RANKED")) {
           isRanked = true;
-          console.log("ranked");
         }
 
         // get player's data from current game
@@ -76,7 +85,7 @@ module.exports.gameTrackingBot = async function (
         );
 
         sendMessageToChannel(
-          `${name} (${playerChampion}) just entered the Rift!\nQueue Type: ${gameMode}`,
+          `${name} (${playerChampion}) just entered the Rift!\nGame Type: ${queueDescription}`,
           client,
           channel
         );
@@ -118,7 +127,7 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
 
         await delay(6000); // Small delay before fetching post-game data
 
-        // Show player's game result
+        // Player's game result
         const playerGameData = await getPlayerDataFromGameData(
           name,
           tag,
@@ -126,9 +135,9 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
         );
 
         // temp catch for when method randomly fails to fetch puuid
-        let playerScoreString;
+        let playerScoreString = "";
         try {
-          playerScoreString = `Final Score: (${playerChampion}) ${playerGameData.kills} Kills  |  ${playerGameData.deaths} Deaths  |  ${playerGameData.assists} Assists`;
+          playerScoreString = `Final Score: (${playerChampion})  ${playerGameData.kills} Kills  :  ${playerGameData.deaths} Deaths  :  ${playerGameData.assists} Assists`;
         } catch (error) {
           console.error("Failed to fetch Player Score", error);
         }
@@ -163,6 +172,7 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
           }
         }
 
+        // Send post game report to discord
         sendMessageToChannel(
           `${"-".repeat(40)}
 ${name}'s game is over...
