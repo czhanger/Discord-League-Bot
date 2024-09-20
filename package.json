@@ -13,6 +13,8 @@
     "dotenv": "^16.4.5",
     "node-fetch": "^3.3.2",
     "prompt-sync": "^4.2.0",
+    "sequelize": "^6.37.3",
+    "sqlite3": "^5.1.7",
     "teemojs": "^1.11.0"
   }
 }
