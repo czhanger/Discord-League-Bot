@@ -46,9 +46,10 @@ module.exports.gameTrackingBot = async function (
       // Get current game data
       const player_puuid = await getPuiid(name, tag);
       const gameData = await getCurrentGame(player_puuid);
-      const summonerId = await getSummonerID(player_puuid);
       // check if queue type is a ranked mode
       let isRanked = false;
+
+      const strDivider = "-".repeat(80);
 
       if (gameData) {
         let { gameId } = gameData;
@@ -63,6 +64,11 @@ module.exports.gameTrackingBot = async function (
         let queueDescription;
         try {
           queueDescription = queueObject.description;
+          // Riot descriptions end each queue type with "games"
+          // remove that final word
+          const words = queueDescription.trim().split(" ");
+          words.pop();
+          queueDescription = words.join(" ");
         } catch (error) {
           console.error("Error accessing queue description", error);
         }
@@ -85,7 +91,10 @@ module.exports.gameTrackingBot = async function (
         );
 
         sendMessageToChannel(
-          `${name} (${playerChampion}) just entered the Rift!\nGame Type: ${queueDescription}`,
+          `${strDivider}
+${name} (${playerChampion}) just entered the Rift!
+Game Type: ${queueDescription}
+${strDivider}`,
           client,
           channel
         );
@@ -104,7 +113,7 @@ module.exports.gameTrackingBot = async function (
         }
 
         // Log New Game Info
-        console.log("-".repeat(40));
+        console.log(strDivider);
         console.log(
           `New Game Started
 Player: ${name}
@@ -112,7 +121,7 @@ Game Mode: ${gameMode}
 ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
         );
         console.log(`Game Start: ${await unixToDate(gameData.gameStartTime)}`);
-        console.log("-".repeat(40));
+        console.log(strDivider);
 
         // Wait until game is over
         while (await getCurrentGame(player_puuid)) {
@@ -121,9 +130,9 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
         }
 
         // Log end of game
-        console.log("-".repeat(40));
+        console.log(strDivider);
         console.log(`${name}'s game ended`);
-        console.log("-".repeat(40));
+        console.log(strDivider);
 
         await delay(6000); // Small delay before fetching post-game data
 
@@ -137,7 +146,7 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
         // temp catch for when method randomly fails to fetch puuid
         let playerScoreString = "";
         try {
-          playerScoreString = `Final Score: (${playerChampion})  ${playerGameData.kills} Kills  :  ${playerGameData.deaths} Deaths  :  ${playerGameData.assists} Assists`;
+          playerScoreString = `${playerGameData.kills}/${playerGameData.deaths}/${playerGameData.assists} KDA`;
         } catch (error) {
           console.error("Failed to fetch Player Score", error);
         }
@@ -168,21 +177,24 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
             rankChangeString =
               "No rank data available. Player is in placements.";
           } else {
-            rankChangeString = `Rank Change: ${currentRank} -> ${newRank} (${LPStr})\n`;
+            // if there was no division jump, don't show the division name twice
+            if (currentRank.split(":")[0] === newRank.split(":")[0]) {
+              rankChangeString = `Rank Change: ${currentRank} -> ${newLP} (${LPStr})\n`;
+            } else {
+              rankChangeString = `Rank Change: ${currentRank} -> ${newRank} (${LPStr})\n`;
+            }
           }
         }
 
         // Send post game report to discord
         sendMessageToChannel(
-          `${"-".repeat(40)}
-${name}'s game is over...
-Game Result: ${gameResult}
-${playerScoreString}
-${isRanked ? rankChangeString : ""}${name} has played ${
+          `${strDivider}
+${name}'s (${playerChampion}) game is over...
+Game Result: ${gameResult} -- ${playerScoreString}
+${isRanked ? rankChangeString : ""}${
             gameList.length
-          } game(s) today.
-Total Game Time: ${gameTimeStr}.
-${"-".repeat(40)}`,
+          } game(s) played today for ${gameTimeStr}
+${strDivider}`,
           client,
           channel
         );

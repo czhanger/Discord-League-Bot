@@ -115,7 +115,7 @@ module.exports.getRankData = async function (summonerId,queue) {
       }
     );
     const rankData = await accountResponse.json();
-    console.log(rankData);
+    // console.log(rankData);
     // returned object holds an object for every game the player has a rank in (lol, tft)
     return rankData.find((game) => game.queueType === queue);
   } catch (error) {

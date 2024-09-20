@@ -63,10 +63,6 @@ for (const file of eventFiles) {
 
 const { gameTrackingBot, stopGameTrackingBot } = require("./game-tracking");
 
-const NAME = "homeslicer";
-const TAG = "na1";
-const CHANNEL = process.env.CHANNEL_ID;
-
 // Log into Discord with client token
 client.login(process.env.DISCORD_TOKEN);
 

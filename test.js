@@ -41,8 +41,10 @@ async function main() {
   // New Rank Old Rank
   //   const LPChange = calcLPChange(50, 47, "W");
   //   console.log(LPChange);
-  const queueId = await getQueueIdFromConfigId(990);
-  console.log(createQueueTypeStr(queueId));
+  // const queueId = await getQueueIdFromConfigId(990);
+  // console.log(createQueueTypeStr(queueId));
+
+
 }
 main();
 
