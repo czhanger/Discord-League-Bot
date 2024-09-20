@@ -49,7 +49,7 @@ module.exports.gameTrackingBot = async function (
       // check if queue type is a ranked mode
       let isRanked = false;
 
-      const strDivider = "-".repeat(80);
+      const strDivider = "-".repeat(40);
 
       if (gameData) {
         let { gameId } = gameData;
@@ -93,8 +93,7 @@ module.exports.gameTrackingBot = async function (
         sendMessageToChannel(
           `${strDivider}
 ${name} (${playerChampion}) just entered the Rift!
-Game Type: ${queueDescription}
-${strDivider}`,
+Game Type: ${queueDescription}`,
           client,
           channel
         );
@@ -193,8 +192,7 @@ ${name}'s (${playerChampion}) game is over...
 Game Result: ${gameResult} -- ${playerScoreString}
 ${isRanked ? rankChangeString : ""}${
             gameList.length
-          } game(s) played today for ${gameTimeStr}
-${strDivider}`,
+          } game(s) played today for ${gameTimeStr}`,
           client,
           channel
         );
