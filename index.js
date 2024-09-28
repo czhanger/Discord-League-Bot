@@ -80,4 +80,3 @@ client.on("ready", () => {
     stopGameTrackingBot(name + tag);
   });
 });
-1280732361859797034

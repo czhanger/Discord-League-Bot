@@ -139,6 +139,7 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
         // Wait until game is over
         while (await getCurrentGame(player_puuid)) {
           if (!botInstances[instanceId]) return; // Check if this instance has been stopped
+          console.log(`{name} in game`);
           await delay(60000); // Wait 1 minute
         }
 
