@@ -104,14 +104,6 @@ module.exports.gameTrackingBot = async function (
 
         sendEmbedToChannel(newGameEmbed, client, channel);
 
-        //         sendMessageToChannel(
-        //           `${strDivider}
-        // ${name} (${playerChampion}) just entered the Rift!
-        // Game Type: ${queueDescription}`,
-        //           client,
-        //           channel
-        //         );
-
         // Save current rank for comparison
         let currentRank;
         let currentLP = null;
@@ -226,16 +218,6 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
         }
 
         sendEmbedToChannel(postGameEmbed, client, channel);
-        //         sendMessageToChannel(
-        //           `${strDivider}
-        // ${name}'s (${playerChampion}) game is over...
-        // Game Result: ${gameResult} -- ${playerScoreString}
-        // ${isRanked ? rankChangeString : ""}${
-        //             gameList.length
-        //           } game(s) played today for ${gameTimeStr}`,
-        //           client,
-        //           channel
-        //         );
       }
 
       // Delay before next check
