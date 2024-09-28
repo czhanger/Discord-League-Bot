@@ -12,6 +12,7 @@ module.exports.createUser = async function (userId) {
     return newUser;
   } catch (error) {
     console.error(error);
+    return null;
   }
 };
 
@@ -74,4 +75,3 @@ module.exports.canAfford = async function (userId, amount) {
     return false;
   }
 };
-
