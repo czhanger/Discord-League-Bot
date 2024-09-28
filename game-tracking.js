@@ -139,7 +139,7 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
         // Wait until game is over
         while (await getCurrentGame(player_puuid)) {
           if (!botInstances[instanceId]) return; // Check if this instance has been stopped
-          console.log(`{name} in game`);
+          console.log(`${name} in game`);
           await delay(60000); // Wait 1 minute
         }
 
@@ -160,7 +160,7 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
         // temp catch for when method randomly fails to fetch puuid
         let playerScoreString = "";
         try {
-          playerScoreString = `${playerGameData.kills}/${playerGameData.deaths}/${playerGameData.assists} KDA`;
+          playerScoreString = `${playerGameData.kills}/${playerGameData.deaths}/${playerGameData.assists}`;
         } catch (error) {
           console.error("Failed to fetch Player Score", error);
         }
@@ -193,9 +193,9 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
           } else {
             // if there was no division jump, don't show the division name twice
             if (currentRank.split(":")[0] === newRank.split(":")[0]) {
-              rankChangeString = `Rank Change: ${currentRank} -> ${newLP} (${LPStr})\n`;
+              rankChangeString = `${currentRank} -> ${newLP} (${LPStr})\n`;
             } else {
-              rankChangeString = `Rank Change: ${currentRank} -> ${newRank} (${LPStr})\n`;
+              rankChangeString = `${currentRank} -> ${newRank} (${LPStr})\n`;
             }
           }
         }
