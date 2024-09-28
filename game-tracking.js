@@ -20,7 +20,13 @@ const {
   createLPStr,
   createQueueTypeStr,
 } = require("./Riot/utilities");
-const { sendMessageToAll, sendMessageToChannel } = require("./defaultChannel");
+
+const { EmbedBuilder } = require("discord.js");
+const {
+  sendMessageToAll,
+  sendMessageToChannel,
+  sendEmbedToChannel,
+} = require("./defaultChannel");
 const { delay } = require("./misc");
 const { unixToDate } = require("./Riot/utilities");
 
@@ -90,13 +96,21 @@ module.exports.gameTrackingBot = async function (
           "" + currentGamePlayerData.championId // add "" converts num to string
         );
 
-        sendMessageToChannel(
-          `${strDivider}
-${name} (${playerChampion}) just entered the Rift!
-Game Type: ${queueDescription}`,
-          client,
-          channel
-        );
+        const newGameEmbed = new EmbedBuilder()
+          .setTitle(`${name} (${playerChampion}) just entered the Rift!`)
+          .setAuthor({ name: "Game Found!" })
+          .addFields({ name: "**Game Mode:**", value: `${queueDescription}` })
+          .setColor("#237feb");
+
+        sendEmbedToChannel(newGameEmbed, client, channel);
+
+        //         sendMessageToChannel(
+        //           `${strDivider}
+        // ${name} (${playerChampion}) just entered the Rift!
+        // Game Type: ${queueDescription}`,
+        //           client,
+        //           channel
+        //         );
 
         // Save current rank for comparison
         let currentRank;
@@ -174,7 +188,7 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
           // if rank data is available, show rank change
           if (currentRank === null || newRank === null) {
             rankChangeString =
-              "No rank data available. Player is in placements.";
+              "No rank data available. Player is in placements.\n";
           } else {
             // if there was no division jump, don't show the division name twice
             if (currentRank.split(":")[0] === newRank.split(":")[0]) {
@@ -186,16 +200,41 @@ ${isRanked ? `Current Rank: ${currentRank}\n` : ""}Current Game Id: ${gameId}`
         }
 
         // Send post game report to discord
-        sendMessageToChannel(
-          `${strDivider}
-${name}'s (${playerChampion}) game is over...
-Game Result: ${gameResult} -- ${playerScoreString}
-${isRanked ? rankChangeString : ""}${
-            gameList.length
-          } game(s) played today for ${gameTimeStr}`,
-          client,
-          channel
-        );
+
+        postGameEmbed = new EmbedBuilder()
+          .setTitle(`${name} (${playerChampion}) ${gameResult}`)
+          .setAuthor({ name: "Game Over..." })
+          .addFields({ name: "**KDA:**", value: `${playerScoreString}` });
+
+        if (isRanked) {
+          postGameEmbed.addFields({
+            name: "**Rank Change:**",
+            value: `${rankChangeString}`,
+          });
+        }
+
+        postGameEmbed.addFields({
+          name: "Time Spent",
+          value: `${gameList.length} game(s) played today for ${gameTimeStr}`,
+        });
+
+        if (gameResult == "Win") {
+          postGameEmbed.setColor("#00b12c");
+        } else {
+          postGameEmbed.setColor("#d30000");
+        }
+
+        sendEmbedToChannel(postGameEmbed, client, channel);
+        //         sendMessageToChannel(
+        //           `${strDivider}
+        // ${name}'s (${playerChampion}) game is over...
+        // Game Result: ${gameResult} -- ${playerScoreString}
+        // ${isRanked ? rankChangeString : ""}${
+        //             gameList.length
+        //           } game(s) played today for ${gameTimeStr}`,
+        //           client,
+        //           channel
+        //         );
       }
 
       // Delay before next check

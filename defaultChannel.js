@@ -32,3 +32,10 @@ module.exports.sendMessageToChannel = function (message, client, channelId) {
     channel.send(message);
   }
 };
+
+module.exports.sendEmbedToChannel = function (embed, client, channelId) {
+  if (client.isReady()) {
+    const channel = client.channels.cache.get(channelId);
+    channel.send({ embeds: [embed] });
+  }
+};
