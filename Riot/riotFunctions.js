@@ -106,7 +106,7 @@ module.exports.getSummonerID = async function (puuid) {
   }
 };
 
-module.exports.getRankData = async function (summonerId,queue) {
+module.exports.getRankData = async function (summonerId, queue) {
   try {
     const accountResponse = await fetch(
       `https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}`,
@@ -271,5 +271,44 @@ module.exports.getQueueFromConfigId = async function (queueTypeConfigID) {
     return queueTypeObject;
   } catch (error) {
     console.error("Unable to fetch Queue Type ID JSON", error);
+  }
+};
+
+// takes player's rank object and returns how much that rank is worth
+// higher ranks are worth exponentially more than the lowest ranks
+module.exports.calculateTradeValue = function (rankData) {
+  tierValue = {
+    IRON: 0.1,
+    BRONZE: 0.5,
+    SILVER: 1,
+    GOLD: 2,
+    PLATINUM: 3.5,
+    EMERALD: 5.5,
+    DIAMOND: 8,
+    MASTER: 11,
+    GRANDMASTER: 14.5,
+    CHALLENGER: 18.5,
+  };
+
+  rankValue = {
+    I: 5,
+    II: 4,
+    III: 3,
+    IV: 2,
+    V: 1,
+  };
+
+  return (
+    tierValue[rankData.tier] * rankValue[rankData.rank] * rankData.leaguePoints
+  );
+};
+
+module.exports.getPlayerRankTradeValue = async function (puuid, queueType) {
+  try {
+    const summonerId = await module.exports.getSummonerID(puuid);
+    const rankData = await module.exports.getRankData(summonerId, queueType);
+    return module.exports.calculateTradeValue(rankData);
+  } catch (error) {
+    console.error("Failed to fetch user's rank trade value", error.message);
   }
 };

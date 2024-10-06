@@ -1,7 +1,8 @@
 const dotenv = require("dotenv");
 dotenv.config();
-NAME = "lolyoultg";
-TAG = "000";
+NAME = "1337jd0g";
+TAG = "jdawg";
+QUEUETYPE = "RANKED_SOLO_5x5";
 const {
   getRankFromNameTag,
   getPuiid,
@@ -15,6 +16,7 @@ const {
   getTotalGameTime,
   getChampionName,
   getQueueIdFromConfigId,
+  getPlayerRankTradeValue,
 } = require("./Riot/riotFunctions");
 
 const {
@@ -43,8 +45,8 @@ async function main() {
   //   console.log(LPChange);
   // const queueId = await getQueueIdFromConfigId(990);
   // console.log(createQueueTypeStr(queueId));
-
-
+  const rankvalue = await getPlayerRankTradeValue(puuid, QUEUETYPE);
+  console.log(rankvalue);
 }
 main();
 

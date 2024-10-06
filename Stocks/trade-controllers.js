@@ -1,7 +1,12 @@
 const { Users } = require("../Models/Users");
 const { Trades } = require("../Models/Trades");
 const { getPuiid, getRankData } = require("../Riot/riotFunctions");
-const { addCurrency } = require("./user-controllers");
+const {
+  addCurrency,
+  showBalance,
+  canAfford,
+  removeCurrency,
+} = require("./user-controllers");
 
 module.exports.createTrade = async function (
   userId,
@@ -14,19 +19,49 @@ module.exports.createTrade = async function (
     const rank = await getRankData(puuid, queueType);
     const purchase_price = rank;
 
-    if (module.exports.existingTrade(userId, puuid)) {
+    // make sure duplicate trade doesn't already exist
+    if (await module.exports.existingTrade(userId, puuid)) {
       return false;
     }
+
+    // check if user can afford trade
+    if (!(await canAfford(userId))) {
+      return {
+        message: "Insufficient Balance",
+        tradeStatus: false,
+      };
+    } else {
+        // attempt to remove currency from user's balance
+      if (!(await removeCurrency(userId, purchase_price))) {
+        return {
+          message: "Error removing funds from balance, trade aborted",
+          tradeStatus: false,
+        };
+      }
+    }
+
+    // only create trade once funds are removed from user's balance
+    const newBalance = await showBalance(userId);
+
     const newTrade = await Trades.create({
       user_id: userId,
       player_puuid: puuid,
       player_rank: rank,
       purchase_price: purchase_price,
     });
-    return newTrade;
+
+    return {
+      message: "Trade created",
+      tradeStatus: true,
+      trade: newTrade,
+      newBalance: newBalance,
+    };
   } catch (error) {
     console.error(error);
-    return null;
+    return {
+      message: "Error creating new trade",
+      tradeStatus: false,
+    };
   }
 };
 
@@ -58,9 +93,30 @@ module.exports.closeTrade = async function (userId, puuid) {
         player_puuid: puuid,
       },
     });
+
     // on close, display price change, and show new balance of user
+    if (!trade) {
+      return { message: "No active trade found", success: false };
+    }
+
+    const priceChange = puuid - trade.purchase_price;
+    const currentPrice = puuid;
+    await addCurrency(userId, currentPrice);
+    const newBalance = await showBalance(userId);
+
+    await trade.destroy();
+
+    return {
+      message: "Trade successfully closed",
+      priceChange: priceChange,
+      newBalance: newBalance,
+      success: true,
+    };
   } catch (error) {
     console.error(error);
-    return null;
+    return {
+      message: "An error occurred while closing the trade",
+      success: false,
+    };
   }
 };
