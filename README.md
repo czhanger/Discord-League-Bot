@@ -1,1 +1,2 @@
-# JaySon
+# Discord League Bot
+
